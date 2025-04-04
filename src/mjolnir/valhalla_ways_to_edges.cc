@@ -26,8 +26,10 @@ using namespace valhalla::midgard;
 struct EdgeAndDirection {
   bool forward;
   GraphId edgeid;
+  std::string shape;
 
-  EdgeAndDirection(const bool f, const GraphId& id) : forward(f), edgeid(id) {
+  EdgeAndDirection(const bool f, const GraphId& id, const std::string& shape)
+      : forward(f), edgeid(id), shape(shape) {
   }
 };
 
@@ -95,7 +97,9 @@ int main(int argc, char** argv) {
 
       // Get the way Id
       uint64_t wayid = tile->edgeinfo(edge).wayid();
-      ways_edges[wayid].push_back({edge->forward(), edge_id});
+      auto encoded_shape = encode(tile->edgeinfo(edge).shape());
+
+      ways_edges[wayid].push_back({edge->forward(), edge_id, encoded_shape});
     }
   }
 
@@ -106,7 +110,7 @@ int main(int argc, char** argv) {
   for (const auto& way : ways_edges) {
     ways_file << way.first;
     for (auto edge : way.second) {
-      ways_file << "," << (uint32_t)edge.forward << "," << (uint64_t)edge.edgeid;
+      ways_file << "," << (uint32_t)edge.forward << "," << (uint64_t)edge.edgeid << "," << edge.shape;
     }
     ways_file << std::endl;
   }
